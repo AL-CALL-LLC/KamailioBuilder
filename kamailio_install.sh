@@ -30,3 +30,24 @@ check_distribution() {
         exit 1
     fi
 }
+
+## Check if Kamailio is already installed
+check_kamailio_installed() {
+    sleep 0.5
+    color_yellow "## Checking if Kamailio is already installed"
+    sleep 1
+    if [[ -x /usr/local/sbin/kamailio ]] || command -v kamailio >/dev/null 2>&1; then
+        color_green ":: Kamailio is already installed on this system."
+        sleep 0.5
+        if command -v kamailio >/dev/null 2>&1; then
+            color_green ":: Using 'kamailio' via PATH to display the version."
+            kamailio -V
+        else
+            color_green ":: 'kamailio' is not in PATH, using /usr/local/sbin/kamailio."
+            /usr/local/sbin/kamailio -V
+        fi
+        sleep 0.5
+        color_yellow "## Kamailio installation program ended."
+        exit 0
+    fi
+}
