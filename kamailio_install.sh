@@ -43,7 +43,7 @@ check_kamailio_installed() {
             color_green ":: Using 'kamailio' via PATH to display the version."
             kamailio -V
         else
-            color_green ":: 'kamailio' is not in PATH, using /usr/local/sbin/kamailio."
+            color_green ":: 'kamailio' is not in PATH, using /usr/local/sbin/kamailio to display version."
             /usr/local/sbin/kamailio -V
         fi
         sleep 0.5
@@ -58,8 +58,8 @@ update_apt_repositories() {
     color_yellow "## Updating APT repositories..."
     sleep 1
     if ! apt update -y; then
-        color_yellow ":: X Failed to update APT repositories. X"
-        color_yellow "..."
+        color_orange ":: X Failed to update APT repositories. X"
+        color_orange "..."
     fi
 }
 
@@ -136,7 +136,7 @@ install_mysql_server() {
     if ! apt -y install default-mysql-server; then
         color_orange ":: X Failed to install the default MySQL server. X"
         color_orange ":: X To use Kamailio with MySQL, you must install an SQL server later. X"
-        color_yellow "..."
+        color_orange "..."
     fi
 }
 
@@ -157,7 +157,7 @@ configure_systemd_services() {
     export PATH=$PATH:/usr/sbin
 
     if ! make install-systemd-debian || ! systemctl enable kamailio; then
-        color_yellow ":: X Failed to configure Kamailio with systemd. X"
+        color_orange ":: X Failed to configure Kamailio with systemd. X"
     fi
     systemctl enable kamailio
     systemctl daemon-reload
@@ -180,7 +180,7 @@ configure_systemd_services() {
         color_green ":: Using 'kamailio' via PATH to display the version."
         kamailio -V
     else
-        color_yellow ":: X 'kamailio' was not added to the PATH. Using /usr/local/sbin/kamailio to display version.X "
+        color_orange ":: X 'kamailio' was not added to the PATH. Using /usr/local/sbin/kamailio to display version.X "
         /usr/local/sbin/kamailio -V
     fi
     color_yellow "## Kamailio installation program ended."
@@ -231,6 +231,6 @@ create_database_and_user() {
     if [ $? -eq 0 ]; then
         color_green ":: User $user1 successfully added. Password: $password1"
     else
-        color_yellow ":: X Failed to add user $user1. X"
+        color_orange ":: X Failed to add user $user1. X"
     fi
 }
