@@ -234,3 +234,17 @@ create_database_and_user() {
         color_orange ":: X Failed to add user $user1. X"
     fi
 }
+
+## Main execution
+welcome_message
+check_root
+check_distribution
+check_kamailio_installed
+update_apt_repositories
+install_dependencies
+prepare_kamailio_storage_and_install
+install_mysql_server
+configure_systemd_services
+configure_config_files
+create_database_and_user
+color_yellow "## End of the script"
