@@ -78,3 +78,51 @@ install_dependencies() {
         sleep 0.5
     done
 }
+
+## Prepare and install Kamailio
+prepare_kamailio_storage_and_install() {
+    ## Create the storage folder
+    color_yellow "## Preparing the folder for Kamailio..."
+    sleep 1
+    kamailio_src="/usr/local/src/kamailio-5.8"
+    if [[ ! -d $kamailio_src ]]; then
+        mkdir -p "$kamailio_src"
+        color_green ":: Folder created: $kamailio_src"
+    else
+        color_green ":: Folder already exists: $kamailio_src"
+    fi
+
+    ## Clone the Git repository
+    color_yellow "## Checking for the Kamailio repository in $kamailio_src..."
+    sleep 1
+    if [[ -d "$kamailio_src/kamailio/.git" ]]; then
+        color_green ":: The Kamailio repository is already cloned in $kamailio_src/kamailio."
+        color_green ":: Updating the existing repository..."
+        cd "$kamailio_src/kamailio" || exit
+        if git pull origin 5.8; then
+            color_green ":: The Kamailio repository was successfully updated."
+        else
+            color_red ":: XX Failed to update the Git repository. XX"
+            exit 1
+        fi
+    else
+        color_green ":: Cloning the Kamailio repository into $kamailio_src..."
+        cd "$kamailio_src" || exit
+        if git clone --depth 1 --branch 5.8 https://github.com/kamailio/kamailio kamailio; then
+            color_green ":: The Kamailio repository was successfully cloned."
+            cd "kamailio"
+        else
+            color_red ":: XX Failed to clone the Git repository. Check your network connection. XX"
+            exit 1
+        fi
+    fi
+
+    ## Compile and install
+    color_yellow "## Compiling and installing Kamailio with db_mysql and tls modules..."
+    sleep 1
+    make clean
+    if ! make include_modules="db_mysql tls" cfg || ! make all || ! make install; then
+        color_red ":: XX Failed to compile or install Kamailio. XX"
+        exit 1
+    fi
+}
