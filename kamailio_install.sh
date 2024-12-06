@@ -18,3 +18,15 @@ check_root() {
         exit 1
     fi
 }
+
+## Check the distribution
+check_distribution() {
+    if [[ -f /etc/os-release ]]; then
+        distribution=$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')
+        codename=$(grep VERSION_CODENAME /etc/os-release | cut -d= -f2)
+        color_green ":: System details: $distribution ($codename)"
+    else
+        color_red ":: XX Unable to determine the distribution. Ensure your system uses /etc/os-release. XX"
+        exit 1
+    fi
+}
