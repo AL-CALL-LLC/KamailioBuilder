@@ -188,3 +188,24 @@ configure_systemd_services() {
     systemctl start kamailio
     kamailio
 }
+
+## Configure config file
+configure_config_files() {
+    sleep 0.5
+    color_yellow "## Proceeding to configure your configuration files"
+    sleep 1
+    color_yellow ">> Please enter your SIP domain:"
+    read sip_domain
+
+    while [ -z "$sip_domain" ]; do
+        color_yellow "No SIP domain entered. Please try again:"
+        read sip_domain
+    done
+
+    config_file="/usr/local/etc/kamailio"
+
+    sed -i 's/^# DBENGINE=MYSQL/DBENGINE=MYSQL/' "$config_file/kamctlrc"
+    sed -i "s/^# SIP_DOMAIN=kamailio.org/SIP_DOMAIN=$sip_domain/" "$config_file/kamctlrc"
+    sed -i 's/^# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/' "$config_file/kamctlrc"
+    sed -i '/#!KAMAILIO/a \#!define WITH_MYSQL\n#!define WITH_AUTH\n#!define WITH_USRLOCDB' "$config_file/kamailio.cfg"
+}
