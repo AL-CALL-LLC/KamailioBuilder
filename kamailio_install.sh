@@ -209,3 +209,28 @@ configure_config_files() {
     sed -i 's/^# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/' "$config_file/kamctlrc"
     sed -i '/#!KAMAILIO/a \#!define WITH_MYSQL\n#!define WITH_AUTH\n#!define WITH_USRLOCDB' "$config_file/kamailio.cfg"
 }
+
+## Configure kamailio database & create test user
+create_database_and_user() {
+    sleep 0.5
+    color_green ":: Configuration updated."
+    kamdbctl create
+
+    sleep 0.5
+    # User and password
+    user1="test"
+    password1=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12)
+
+    sleep 0.5
+    color_yellow "## Creating a test user : $user1"
+    sleep 1
+
+    color_green ":: Adding user $user1 with the generated password..."
+    kamctl add "$user1" "$password1"
+
+    if [ $? -eq 0 ]; then
+        color_green ":: User $user1 successfully added. Password: $password1"
+    else
+        color_yellow ":: X Failed to add user $user1. X"
+    fi
+}
