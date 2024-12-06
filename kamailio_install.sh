@@ -51,3 +51,30 @@ check_kamailio_installed() {
         exit 0
     fi
 }
+
+## Update APT repositories
+update_apt_repositories() {
+    sleep 0.5
+    color_yellow "## Updating APT repositories..."
+    sleep 1
+    if ! apt update -y; then
+        color_yellow ":: X Failed to update APT repositories. X"
+        color_yellow "..."
+    fi
+}
+
+## Install dependencies
+install_dependencies() {
+    color_yellow "## Installing required dependencies..."
+    sleep 1
+    deps=(make autoconf pkg-config git gcc g++ flex bison libssl-dev default-libmysqlclient-dev)
+
+    for dep in "${deps[@]}"; do
+        color_yellow ":: Installing $dep..."
+        if ! apt install -y "$dep"; then
+            color_red ":: XX Failed to install $dep. XX"
+            exit 1
+        fi
+        sleep 0.5
+    done
+}
