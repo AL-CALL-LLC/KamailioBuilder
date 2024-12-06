@@ -126,3 +126,16 @@ prepare_kamailio_storage_and_install() {
         exit 1
     fi
 }
+
+## Install MySQL server
+install_mysql_server() {
+    ## Install MySQL server
+    sleep 0.5
+    color_yellow "## Installing the default MySQL server"
+    sleep 1
+    if ! apt -y install default-mysql-server; then
+        color_orange ":: X Failed to install the default MySQL server. X"
+        color_orange ":: X To use Kamailio with MySQL, you must install an SQL server later. X"
+        color_yellow "..."
+    fi
+}
