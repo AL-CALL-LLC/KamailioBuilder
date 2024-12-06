@@ -139,3 +139,52 @@ install_mysql_server() {
         color_yellow "..."
     fi
 }
+
+## Configure systemd service
+configure_systemd_services() {
+    ## Configure systemd services
+    sleep 0.5
+    color_yellow "## Configuring systemd services for Kamailio..."
+    sleep 1
+
+    # Save 'adduser' default permission
+    original_permissions=$(stat -c "%a" /usr/sbin/adduser)
+    original_owner=$(stat -c "%U:%G" /usr/sbin/adduser)
+
+    # Edit permission to set adduser available
+    sudo chmod 755 /usr/sbin/adduser
+    sudo chown root:root /usr/sbin/adduser
+    export PATH=$PATH:/usr/sbin
+
+    if ! make install-systemd-debian || ! systemctl enable kamailio; then
+        color_yellow ":: X Failed to configure Kamailio with systemd. X"
+    fi
+    systemctl enable kamailio
+    systemctl daemon-reload
+
+    # Reset adduser permission to default
+    sudo chmod "$original_permissions" /usr/sbin/adduser
+    sudo chown "$original_owner" /usr/sbin/adduser
+
+    sleep 0.5
+    color_yellow "## Adding Kamailio to the PATH"
+    sleep 1
+    echo 'PATH=$PATH:/usr/local/sbin' >> ~/.bashrc
+    echo 'export PATH' >> ~/.bashrc
+    source ~/.bashrc
+
+    sleep 0.5
+    color_yellow "## Kamailio installation and configuration completed."
+    sleep 1
+    if command -v kamailio >/dev/null 2>&1; then
+        color_green ":: Using 'kamailio' via PATH to display the version."
+        kamailio -V
+    else
+        color_yellow ":: X 'kamailio' was not added to the PATH. Using /usr/local/sbin/kamailio to display version.X "
+        /usr/local/sbin/kamailio -V
+    fi
+    color_yellow "## Kamailio installation program ended."
+    color_green ":: Starting Kamailio."
+    systemctl start kamailio
+    kamailio
+}
