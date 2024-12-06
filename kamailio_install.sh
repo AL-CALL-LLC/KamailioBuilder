@@ -5,3 +5,9 @@ color_red() { echo -e "\e[31m$1\e[0m"; }
 color_green() { echo -e "\e[32m$1\e[0m"; }
 color_yellow() { echo -e "\e[33m$1\e[0m"; }
 color_blue() { echo -e "\e[34m$1\e[0m"; }
+
+## welcome message
+welcome_message() {
+    color_yellow "## Welcome to the Kamailio 5.8 installation script."
+}
+
