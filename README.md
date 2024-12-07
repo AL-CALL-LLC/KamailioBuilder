@@ -27,7 +27,7 @@ KamailioBuilder is an open-source tool designed to simplify the process of downl
 ### 1. Download the script 
 Download and execute the script. 
 ```bash
-curl -O https://raw.githubusercontent.com/AL-CALL-LLC/KamailioBuilder/refs/heads/dev/kamailio_install.sh
+curl -O https://raw.githubusercontent.com/AL-CALL-LLC/KamailioBuilder/refs/heads/main/kamailio_install.sh
 chmod +x kamailio_install.sh
 ./kamailio_install.sh
 ```
