@@ -24,31 +24,25 @@ KamailioBuilder is an open-source tool designed to simplify the process of downl
 ---
 
 ## ⚙️ Installation  
-### 1. Clone the repository  
-Start by cloning the project to your system:  
+### 1. Download the script 
+First, download the script
 ```bash
-git clone https://github.com/AL-CALL-LLC/KamailioBuilder
+curl -O https://raw.githubusercontent.com/AL-CALL-LLC/KamailioBuilder/refs/heads/main/kamailio_install.sh
 ```
 
-### 2. Navigate to the project directory
-Change your working directory to the cloned folder:
-```bash
-cd KamailioBuilder
-```
-
-### 3. Grant execution permissions to the script
+### 2. Grant execution permissions to the script
 Ensure the installation script is executable:
 ```bash
-chmod 755 kamailio_install.sh
+chmod +x kamailio_install.sh
 ```
 
-### 4. Run the script
+### 3. Run the script
 Execute the installation script to start the process:
 ```bash
 ./kamailio_install.sh
 ```
 
-### 5. Update Your PATH if ```kamailio``` Command Doesn't Work Directly
+### 4. Update your PATH if ```kamailio``` Command doesn't work directly
 After installation, ensure Kamailio is available in your shell's environment:
 ```bash
 source ~/.bashrc
