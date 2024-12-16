@@ -47,6 +47,7 @@ check_kamailio_installed() {
             /usr/local/sbin/kamailio -V
         fi
         sleep 0.5
+        ask_kamailio_module_installation
         color_yellow "## Kamailio installation program ended."
         exit 0
     fi
@@ -235,6 +236,138 @@ create_database_and_user() {
     fi
 }
 
+# install kamailio other modules
+install_kamailio_modules() {
+    # Return to source directory
+    cd /usr/local/src/kamailio-5.8/kamailio
+
+    # Array of Kamailio modules with descriptions
+    modules=(
+        "app_lua"      # Lua scripting support
+        "app_python3"  # Python scripting support
+        "http_client"  # HTTP client for external requests
+        "presence"     # Presence management
+        "uuid"         # Unique identifier generation
+        "xmlrpc"       # XML-RPC support
+        "websocket"    # WebSocket protocol support
+    )
+
+    # Associative array of dependencies with explanatory comments
+    declare -A dependencies
+    dependencies["app_lua"]="liblua5.1-0-dev"            # Lua dev libraries
+    dependencies["app_python3"]="python3-dev"             # Python dev libraries
+    dependencies["http_client"]="libcurl4-openssl-dev"    # Curl for HTTP
+    dependencies["presence"]="libxml2-dev"                # XML for presence
+    dependencies["uuid"]="uuid-dev"                       # UUID dev libraries
+    dependencies["xmlrpc"]="libxml2-dev"                  # XML for XMLRPC
+    dependencies["websocket"]="libssl-dev"                # SSL for websocket
+
+    # Display list of available modules with descriptions
+    color_yellow "## List of available modules:"
+    for i in "${!modules[@]}"; do
+        echo "$((i+1))) ${modules[$i]}"
+    done
+
+    # Ask user to select modules
+    color_yellow ":: Enter the numbers of modules to install (separated by spaces): "
+    read -a selected_indices
+
+    # Vérifier si des modules ont été sélectionnés
+    if [ ${#selected_indices[@]} -eq 0 ]; then
+        color_red ":: XX No module selected. Installation canceled. XX"
+        return 1
+    fi
+
+    # Verification and processing of selected modules
+    for index in "${selected_indices[@]}"; do
+        adjusted_index=$((index-1))
+        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$adjusted_index" -lt "${#modules[@]}" ]; then
+            module_name="${modules[$adjusted_index]}"
+            module_deps="${dependencies[$module_name]}"
+            color_yellow ":: Module $module_name will need dependencies: $module_deps"
+        else
+            color_orange ":: X Invalid index ignored: $index X"
+        fi
+    done
+
+    # Installing dependencies for selected modules
+    color_yellow "## Installing dependencies..."
+    for index in "${selected_indices[@]}"; do
+        adjusted_index=$((index-1))
+        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$adjusted_index" -lt "${#modules[@]}" ]; then
+            module_name="${modules[$adjusted_index]}"
+            module_deps="${dependencies[$module_name]}"
+            
+            if [ ! -z "$module_deps" ]; then
+                color_orange ":: Installing dependencies for $module_name..."
+                # Using apt-get with -y for non-interactive installation
+                sudo apt-get install -y $module_deps
+                if [ $? -eq 0 ]; then
+                    color_green ":: Dependencies installed for $module_name"
+                else
+                    color_red ":: XX Error installing dependencies for $module_name XX"
+                    return 1
+                fi
+            fi
+        fi
+    done
+
+    # Module compilation phase
+    color_yellow ":: Compiling modules..."
+
+    # Building module list for include_modules
+    # Expected format: module1 module2 module3
+    module_list=""
+    for index in "${selected_indices[@]}"; do
+        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$index" -lt "${#modules[@]}" ]; then
+            module_name="${modules[$index]}"
+            if [ -z "$module_list" ]; then
+                module_list="$module_name"
+            else
+                module_list="$module_list $module_name"
+            fi
+        fi
+    done
+
+    # Cleanup and compilation
+    color_yellow "## Running make clean..."
+    make clean
+
+    color_yellow ":: Compiling with modules: $module_list"
+    make include_modules="$module_list" cfg
+    make all
+    make install
+    if [ $? -eq 0 ]; then
+        color_green ":: Compilation successful"
+        return 0
+    else
+        color_red ":: XX Compilation error XX"
+        return 1
+    fi
+}
+
+# Function to ask user if they want to install modules
+ask_kamailio_module_installation() {
+    while true; do
+        color_yellow "## Do you want to install additional modules? (yes/no): "
+        read response
+        case $response in
+            [Yy]* )
+                color_yellow ":: Starting module installation..."
+                install_kamailio_modules
+                break
+                ;;
+            [Nn]* )
+                color_orange ":: X Installation cancelled. X"
+                break
+                ;;
+            * )
+                color_orange ":: Please answer yes or no"
+                ;;
+        esac
+    done
+}
+
 ## Main execution
 welcome_message
 check_root
@@ -247,4 +380,5 @@ install_mysql_server
 configure_systemd_services
 configure_config_files
 create_database_and_user
+ask_kamailio_module_installation
 color_yellow "## End of the script"
