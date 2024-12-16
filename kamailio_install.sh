@@ -262,9 +262,7 @@ install_kamailio_modules() {
         "app_lua"      # Lua scripting support
         "app_python3"  # Python scripting support
         "http_client"  # HTTP client for external requests
-        "presence"     # Presence management
         "uuid"         # Unique identifier generation
-        "xmlrpc"       # XML-RPC support
         "websocket"    # WebSocket protocol support
     )
 
@@ -273,15 +271,13 @@ install_kamailio_modules() {
     dependencies["app_lua"]="liblua5.1-0-dev"              # Lua dev libraries and runtime
     dependencies["app_python3"]="python3-dev python3"              # Python dev libraries and runtime
     dependencies["http_client"]="libcurl4-openssl-dev"            # Curl for HTTP
-    dependencies["presence"]="libxml2-dev"                        # XML for presence
     dependencies["uuid"]="uuid-dev"                              # UUID dev libraries
-    dependencies["xmlrpc"]="libxml2-dev libxml2-utils"           # XML for XMLRPC and tools
     dependencies["websocket"]="libssl-dev libunistring-dev"            # SSL and compression for websocket
 
     # Display list of available modules with descriptions
     color_yellow "## List of available modules:"
     for i in "${!modules[@]}"; do
-        echo "$((i+1))) ${modules[$i]}"
+        echo "$((i+1))) ${modules[i]}"
     done
 
     # Ask user to select modules
@@ -296,9 +292,8 @@ install_kamailio_modules() {
 
     # Verification and processing of selected modules
     for index in "${selected_indices[@]}"; do
-        adjusted_index=$((index-1))
-        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$adjusted_index" -lt "${#modules[@]}" ]; then
-            module_name="${modules[$adjusted_index]}"
+        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$index" -le "${#modules[@]}" ]; then
+            module_name="${modules[$((index-1))]}"
             module_deps="${dependencies[$module_name]}"
             color_yellow ":: Module $module_name will need dependencies: $module_deps"
         else
@@ -309,9 +304,8 @@ install_kamailio_modules() {
     # Installing dependencies for selected modules
     color_yellow "## Installing dependencies..."
     for index in "${selected_indices[@]}"; do
-        adjusted_index=$((index-1))
-        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$adjusted_index" -lt "${#modules[@]}" ]; then
-            module_name="${modules[$adjusted_index]}"
+        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$index" -le "${#modules[@]}" ]; then
+            module_name="${modules[$((index-1))]}"
             module_deps="${dependencies[$module_name]}"
             
             if [ ! -z "$module_deps" ]; then
@@ -335,8 +329,8 @@ install_kamailio_modules() {
     # Expected format: module1 module2 module3
     module_list=""
     for index in "${selected_indices[@]}"; do
-        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$index" -lt "${#modules[@]}" ]; then
-            module_name="${modules[$index]}"
+        if [[ $index =~ ^[0-9]+$ ]] && [ "$index" -gt 0 ] && [ "$index" -le "${#modules[@]}" ]; then
+            module_name="${modules[$((index-1))]}"
             if [ -z "$module_list" ]; then
                 module_list="$module_name"
             else
