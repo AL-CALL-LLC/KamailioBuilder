@@ -270,13 +270,13 @@ install_kamailio_modules() {
 
     # Associative array of dependencies with explanatory comments
     declare -A dependencies
-    dependencies["app_lua"]="liblua5.1-0-dev"            # Lua dev libraries
-    dependencies["app_python3"]="python3-dev"             # Python dev libraries
-    dependencies["http_client"]="libcurl4-openssl-dev"    # Curl for HTTP
-    dependencies["presence"]="libxml2-dev"                # XML for presence
-    dependencies["uuid"]="uuid-dev"                       # UUID dev libraries
-    dependencies["xmlrpc"]="libxml2-dev"                  # XML for XMLRPC
-    dependencies["websocket"]="libssl-dev"                # SSL for websocket
+    dependencies["app_lua"]="liblua5.1-0-dev"              # Lua dev libraries and runtime
+    dependencies["app_python3"]="python3-dev python3"              # Python dev libraries and runtime
+    dependencies["http_client"]="libcurl4-openssl-dev"            # Curl for HTTP
+    dependencies["presence"]="libxml2-dev"                        # XML for presence
+    dependencies["uuid"]="uuid-dev"                              # UUID dev libraries
+    dependencies["xmlrpc"]="libxml2-dev libxml2-utils"           # XML for XMLRPC and tools
+    dependencies["websocket"]="libssl-dev libunistring-dev"            # SSL and compression for websocket
 
     # Display list of available modules with descriptions
     color_yellow "## List of available modules:"
