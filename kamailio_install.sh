@@ -14,7 +14,9 @@ welcome_message() {
 ## Check if the script is run as root
 check_root() {
     if [[ $EUID -ne 0 ]]; then
-        color_red ":: XX This script must be run with root privileges. Please try again with 'sudo'."
+        color_red ":: XX Error: Root privileges required"
+        color_red ":: XX Please run this script with 'sudo' or as root user"
+        color_red ":: XX Example: sudo ./kamailio_install.sh"
         exit 1
     fi
 }
@@ -26,7 +28,9 @@ check_distribution() {
         codename=$(grep VERSION_CODENAME /etc/os-release | cut -d= -f2)
         color_green ":: System details: $distribution ($codename)"
     else
-        color_red ":: XX Unable to determine the distribution. Ensure your system uses /etc/os-release. XX"
+        color_red ":: XX Error: Distribution detection failed"
+        color_red ":: XX Unable to find /etc/os-release file"
+        color_red ":: XX This script requires a Debian-based distribution"
         exit 1
     fi
 }
@@ -73,7 +77,9 @@ install_dependencies() {
     for dep in "${deps[@]}"; do
         color_yellow ":: Installing $dep..."
         if ! apt install -y "$dep"; then
-            color_red ":: XX Failed to install $dep. XX"
+            color_red ":: XX Error: Failed to install dependency: $dep"
+            color_red ":: XX Please check your internet connection and apt sources"
+            color_red ":: XX You can try: apt update && apt install -y $dep"
             exit 1
         fi
         sleep 0.5
@@ -113,7 +119,12 @@ prepare_kamailio_storage_and_install() {
             color_green ":: The Kamailio repository was successfully cloned."
             cd "kamailio"
         else
-            color_red ":: XX Failed to clone the Git repository. Check your network connection. XX"
+            color_red ":: XX Error: Git clone failed"
+            color_red ":: XX Unable to clone Kamailio repository from GitHub"
+            color_red ":: XX Please check:"
+            color_red "::    - Your internet connection"
+            color_red "::    - GitHub accessibility (https://github.com)"
+            color_red "::    - Git is properly installed"
             exit 1
         fi
     fi
@@ -123,7 +134,12 @@ prepare_kamailio_storage_and_install() {
     sleep 1
     make clean
     if ! make include_modules="db_mysql tls" cfg || ! make all || ! make install; then
-        color_red ":: XX Failed to compile or install Kamailio. XX"
+        color_red ":: XX Error: Compilation/Installation failed"
+        color_red ":: XX One of these steps failed:"
+        color_red "::    - Configuration (make cfg)"
+        color_red "::    - Compilation (make all)"
+        color_red "::    - Installation (make install)"
+        color_red ":: XX Check the output above for detailed error messages"
         exit 1
     fi
 }
