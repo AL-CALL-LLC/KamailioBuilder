@@ -65,7 +65,7 @@ parse_arguments() {
         echo "  -h, --help              Display this help message"
         echo "  -sip, --sip-domain      Specify the SIP domain (ex: -sip sip.example.com)"
         echo "  -y, --yes               Automatically answer 'yes' to all questions"
-        echo "  -v, --version           Display script version"
+        echo "  -v, --version           Display kamailio version that will be installed"
         echo "  --show-modules          Display available modules and exit"
         echo
         exit 0

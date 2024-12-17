@@ -44,6 +44,40 @@ Alternatively, run the script in the current shell session:
 
 ---
 
+## 🧩 Command Line Options
+The script supports several command-line options to customize the installation:
+
+```bash
+Usage: ./kamailio_install.sh [options]
+
+Options:
+  -h, --help              Display this help message
+  -sip, --sip-domain      Specify the SIP domain (ex: -sip sip.example.com)
+  -y, --yes               Automatically answer 'yes' to all questions
+  -v, --version           Display kamailio version that will be installed
+  --show-modules          Display available modules and exit
+```
+
+### Examples:
+```bash
+# Display help
+./kamailio_install.sh -h
+
+# Install with specific SIP domain
+./kamailio_install.sh -sip example.com
+
+# Non-interactive installation
+./kamailio_install.sh -y -sip example.com
+
+# Show available modules
+./kamailio_install.sh --show-modules
+
+# Display kamailio version that will be installed
+./kamailio_install.sh -v
+```
+
+---
+
 ## 🧩 How It Works  
 The script automates the following tasks:  
 1. **System Checks**:  
