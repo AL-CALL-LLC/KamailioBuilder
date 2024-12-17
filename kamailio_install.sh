@@ -224,6 +224,7 @@ configure_config_files() {
     sed -i 's/^# DBENGINE=MYSQL/DBENGINE=MYSQL/' "$config_file/kamctlrc"
     sed -i "s/^# SIP_DOMAIN=kamailio.org/SIP_DOMAIN=$sip_domain/" "$config_file/kamctlrc"
     sed -i 's/^# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/' "$config_file/kamctlrc"
+    sed -i 's|^# PID_FILE=/run/kamailio/kamailio.pid|PID_FILE=/run/kamailio/kamailio.pid|' "$config_file/kamctlrc" 
     sed -i '/#!KAMAILIO/a \#!define WITH_MYSQL\n#!define WITH_AUTH\n#!define WITH_USRLOCDB' "$config_file/kamailio.cfg"
 }
 
