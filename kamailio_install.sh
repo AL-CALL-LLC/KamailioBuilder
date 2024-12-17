@@ -6,6 +6,78 @@ color_green() { echo -e "\e[32m$1\e[0m"; }
 color_orange() { echo -e "\e[33m$1\e[0m"; }
 color_yellow() { echo -e "\e[38;5;214m$1\e[0m"; }
 
+## Parse command line arguments
+parse_arguments() {
+    # Initialize variables
+    sip_domain=""
+    show_help=false
+    auto_yes=false
+    show_version=false
+    show_modules_only=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help=true
+                shift
+                ;;
+            -sip|--sip-domain)
+                if [[ -n $2 ]]; then
+                    sip_domain="$2"
+                    shift 2
+                else
+                    color_red ":: XX Error: -sip option requires an argument"
+                    exit 1
+                fi
+                ;;
+            -y|--yes)
+                auto_yes=true
+                shift
+                ;;
+            -v|--version)
+                show_version=true
+                shift
+                ;;
+            --show-modules)
+                show_modules_only=true
+                shift
+                ;;
+            *)
+                color_red ":: XX Unrecognized option: $1"
+                color_red ":: XX Use -h or --help to see available options"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Display version if requested
+    if [[ $show_version == true ]]; then
+        echo "Kamailio installation script version 5.8"
+        exit 0
+    fi
+
+    # Display help if requested
+    if [[ $show_help == true ]]; then
+        echo "Usage: $0 [options]"
+        echo
+        echo "Options:"
+        echo "  -h, --help              Display this help message"
+        echo "  -sip, --sip-domain      Specify the SIP domain (ex: -sip sip.example.com)"
+        echo "  -y, --yes               Automatically answer 'yes' to all questions"
+        echo "  -v, --version           Display script version"
+        echo "  --show-modules          Display available modules and exit"
+        echo
+        exit 0
+    fi
+
+    # Show modules if requested
+    if [[ $show_modules_only == true ]]; then
+        show_available_modules
+        exit 0
+    fi
+}
+
 ## welcome message
 welcome_message() {
     color_yellow "## Welcome to the Kamailio 5.8 installation script."
@@ -211,13 +283,19 @@ configure_config_files() {
     sleep 0.5
     color_yellow "## Proceeding to configure your configuration files"
     sleep 1
-    color_yellow ">> Please enter your SIP domain:"
-    read sip_domain
-
-    while [ -z "$sip_domain" ]; do
-        color_yellow "No SIP domain entered. Please try again:"
+    
+    # Si le domaine SIP n'a pas été fourni en argument, le demander
+    if [[ -z "$sip_domain" ]]; then
+        color_yellow ">> Please enter your SIP domain:"
         read sip_domain
-    done
+
+        while [ -z "$sip_domain" ]; do
+            color_yellow "No SIP domain entered. Please try again:"
+            read sip_domain
+        done
+    else
+        color_green ":: Using provided SIP domain: $sip_domain"
+    fi
 
     config_file="/usr/local/etc/kamailio"
 
@@ -287,7 +365,7 @@ install_kamailio_modules() {
 
     # Vérifier si des modules ont été sélectionnés
     if [ ${#selected_indices[@]} -eq 0 ]; then
-        color_red ":: XX No module selected. Installation canceled. XX"
+        color_red ":: XX No module selected. No module added. XX"
         return 1
     fi
 
@@ -359,6 +437,12 @@ install_kamailio_modules() {
 
 # Function to ask user if they want to install modules
 ask_kamailio_module_installation() {
+    if [[ $auto_yes == true ]]; then
+        color_yellow ":: Auto-installing modules..."
+        install_kamailio_modules
+        return
+    fi
+
     while true; do
         color_yellow "## Do you want to install additional modules? (yes/no): "
         read response
@@ -369,7 +453,7 @@ ask_kamailio_module_installation() {
                 break
                 ;;
             [Nn]* )
-                color_orange ":: X Installation cancelled. X"
+                color_orange ":: X No module added. X"
                 break
                 ;;
             * )
@@ -379,7 +463,25 @@ ask_kamailio_module_installation() {
     done
 }
 
+# Nouvelle fonction pour afficher les modules disponibles
+show_available_modules() {
+    echo "Available Kamailio modules:"
+    echo
+    echo "Core modules:"
+    echo "  - db_mysql     : MySQL database support"
+    echo "  - tls         : TLS/SSL support"
+    echo
+    echo "Additional modules:"
+    echo "  - app_lua      : Lua scripting support"
+    echo "  - app_python3  : Python scripting support"
+    echo "  - http_client  : HTTP client for external requests"
+    echo "  - uuid        : Unique identifier generation"
+    echo "  - websocket   : WebSocket protocol support"
+    echo
+}
+
 ## Main execution
+parse_arguments "$@"
 welcome_message
 check_root
 check_distribution
