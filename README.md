@@ -55,7 +55,7 @@ Options:
   -sip, --sip-domain      Specify the SIP domain (ex: -sip sip.example.com)
   -y, --yes               Automatically answer 'yes' to all questions
   -v, --version           Display kamailio version that will be installed
-  --show-modules          Display available modules and exit
+  --show-modules          Display default modules (db_mysql, tls) and additional modules available for         installation
 ```
 
 ### Examples:
