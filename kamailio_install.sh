@@ -342,6 +342,7 @@ install_kamailio_modules() {
         "app_lua"      # Lua scripting support
         "app_python3"  # Python scripting support
         "http_client"  # HTTP client for external requests
+        "json"         # JSON support
         "uuid"         # Unique identifier generation
         "websocket"    # WebSocket protocol support
     )
@@ -351,8 +352,9 @@ install_kamailio_modules() {
     dependencies["app_lua"]="liblua5.1-0-dev"              # Lua dev libraries and runtime
     dependencies["app_python3"]="python3-dev python3"              # Python dev libraries and runtime
     dependencies["http_client"]="libcurl4-openssl-dev"            # Curl for HTTP
+    dependencies["json"]="libjson-c-dev"                         # JSON dev libraries
     dependencies["uuid"]="uuid-dev"                              # UUID dev libraries
-    dependencies["websocket"]="libssl-dev libunistring-dev"            # SSL and compression for websocket
+    dependencies["websocket"]="libssl-dev libunistring-dev"        # SSL and compression for websocket
 
     # Display list of available modules with descriptions
     color_yellow "## List of available modules:"
@@ -476,6 +478,7 @@ show_available_modules() {
     echo "  - app_lua      : Lua scripting support"
     echo "  - app_python3  : Python scripting support"
     echo "  - http_client  : HTTP client for external requests"
+    echo "  - json        : JSON support"
     echo "  - uuid        : Unique identifier generation"
     echo "  - websocket   : WebSocket protocol support"
     echo
