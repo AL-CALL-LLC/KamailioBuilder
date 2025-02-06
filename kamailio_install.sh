@@ -343,6 +343,7 @@ install_kamailio_modules() {
         "http_client"  # HTTP client for external requests
         "uuid"         # Unique identifier generation
         "websocket"    # WebSocket protocol support
+        "json"         # Retrieve values from a JSON string
     )
 
     # Associative array of dependencies with explanatory comments
@@ -352,6 +353,8 @@ install_kamailio_modules() {
     dependencies["http_client"]="libcurl4-openssl-dev"            # Curl for HTTP
     dependencies["uuid"]="uuid-dev"                              # UUID dev libraries
     dependencies["websocket"]="libssl-dev libunistring-dev"            # SSL and compression for websocket
+    dependencies["json"]="libjson-c-dev"            # retrieve values from a JSON string
+    
 
     # Display list of available modules with descriptions
     color_yellow "## List of available modules:"
@@ -477,6 +480,7 @@ show_available_modules() {
     echo "  - http_client  : HTTP client for external requests"
     echo "  - uuid        : Unique identifier generation"
     echo "  - websocket   : WebSocket protocol support"
+    echo "  - json        : Retrieve values from a JSON string"
     echo
 }
 
