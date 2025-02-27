@@ -66,7 +66,7 @@ parse_arguments() {
         echo "  -sip, --sip-domain      Specify the SIP domain (ex: -sip sip.example.com)"
         echo "  -y, --yes               Automatically answer 'yes' to all questions"
         echo "  -v, --version           Display kamailio version that will be installed"
-        echo "  --show-modules          Display default modules (db_mysql, tls) and additional modules available for installation"
+        echo "  --show-modules          Display available modules and exit"
         echo
         exit 0
     fi
@@ -304,7 +304,6 @@ configure_config_files() {
     sed -i 's/^# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/' "$config_file/kamctlrc"
     sed -i 's|^# PID_FILE=/run/kamailio/kamailio.pid|PID_FILE=/run/kamailio/kamailio.pid|' "$config_file/kamctlrc" 
     sed -i '/#!KAMAILIO/a \#!define WITH_MYSQL\n#!define WITH_AUTH\n#!define WITH_USRLOCDB' "$config_file/kamailio.cfg"
-    systemctl restart kamailio
 }
 
 ## Configure kamailio database & create test user
@@ -342,9 +341,10 @@ install_kamailio_modules() {
         "app_lua"      # Lua scripting support
         "app_python3"  # Python scripting support
         "http_client"  # HTTP client for external requests
-        "json"         # JSON support
         "uuid"         # Unique identifier generation
         "websocket"    # WebSocket protocol support
+        "json"         # Retrieve values from a JSON string
+        "db_postgres"         # postgreSQL module
     )
 
     # Associative array of dependencies with explanatory comments
@@ -352,9 +352,11 @@ install_kamailio_modules() {
     dependencies["app_lua"]="liblua5.1-0-dev"              # Lua dev libraries and runtime
     dependencies["app_python3"]="python3-dev python3"              # Python dev libraries and runtime
     dependencies["http_client"]="libcurl4-openssl-dev"            # Curl for HTTP
-    dependencies["json"]="libjson-c-dev"                         # JSON dev libraries
     dependencies["uuid"]="uuid-dev"                              # UUID dev libraries
-    dependencies["websocket"]="libssl-dev libunistring-dev"        # SSL and compression for websocket
+    dependencies["websocket"]="libssl-dev libunistring-dev"            # SSL and compression for websocket
+    dependencies["json"]="libjson-c-dev"            # retrieve values from a JSON string
+    dependencies["db_postgres"]="libpq-dev libpq5"            # postgreSQL module
+    
 
     # Display list of available modules with descriptions
     color_yellow "## List of available modules:"
@@ -478,9 +480,9 @@ show_available_modules() {
     echo "  - app_lua      : Lua scripting support"
     echo "  - app_python3  : Python scripting support"
     echo "  - http_client  : HTTP client for external requests"
-    echo "  - json        : JSON support"
     echo "  - uuid        : Unique identifier generation"
     echo "  - websocket   : WebSocket protocol support"
+    echo "  - json        : Retrieve values from a JSON string"
     echo
 }
 
