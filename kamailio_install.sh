@@ -224,7 +224,20 @@ install_mysql_server() {
     sleep 1
     if ! apt -y install default-mysql-server; then
         color_orange ":: X Failed to install the default MySQL server. X"
-        color_orange ":: X To use Kamailio with MySQL, you must install an SQL server later. X"
+        color_orange ":: X To use Kamailio with MySQL, you must install an MySQL server later. X"
+        color_orange "..."
+    fi
+}
+
+## Install PostgreSQL server
+install_postgreSQL() {
+    ## Install PostgreSQL server
+    sleep 0.5
+    color_yellow "## Installing the default PostgreSQL server"
+    sleep 1
+    if ! apt -y install postgresql postgresql-client; then
+        color_orange ":: X Failed to install the default PostgreSQL server. X"
+        color_orange ":: X To use Kamailio with PostgreSQL, you must install an PostgreSQL server later. X"
         color_orange "..."
     fi
 }
@@ -344,6 +357,7 @@ install_kamailio_modules() {
         "uuid"         # Unique identifier generation
         "websocket"    # WebSocket protocol support
         "json"         # Retrieve values from a JSON string
+        "db_postgres"         # postgreSQL module
     )
 
     # Associative array of dependencies with explanatory comments
@@ -354,6 +368,7 @@ install_kamailio_modules() {
     dependencies["uuid"]="uuid-dev"                              # UUID dev libraries
     dependencies["websocket"]="libssl-dev libunistring-dev"            # SSL and compression for websocket
     dependencies["json"]="libjson-c-dev"            # retrieve values from a JSON string
+    dependencies["db_postgres"]="libpq-dev libpq5"            # postgreSQL module
     
 
     # Display list of available modules with descriptions
