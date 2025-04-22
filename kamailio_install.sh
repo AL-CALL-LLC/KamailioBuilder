@@ -216,18 +216,45 @@ prepare_kamailio_storage_and_install() {
     fi
 }
 
-## Install MySQL server
+ask_for_mysql_server_installation() {
+    while true; do
+        color_yellow "## Do you want to install the default MySQL server? (yes/no): "
+        read response
+        case "${response,,}" in  # convertit en minuscule
+            yes | y )
+                color_yellow ":: Starting installation..."
+                install_mysql_server
+                break
+                ;;
+            no | n )
+                color_orange ":: Provide your SQL Server credentials"
+                color_yellow "## Username: "
+                read sqlusername
+                color_yellow "## Password: "
+                read sqlpassword  # -s pour cacher le mot de passe
+                # Tu peux utiliser ces variables ensuite ou les exporter
+                export sqlusername sqlpassword
+                break
+                ;;
+            * )
+                color_orange ":: Please answer yes or no"
+                ;;
+        esac
+    done
+}
+
 install_mysql_server() {
-    ## Install MySQL server
     sleep 0.5
-    color_yellow "## Installing the default MySQL server"
+    color_yellow "## Installing the default MySQL server..."
     sleep 1
     if ! apt -y install default-mysql-server; then
-        color_orange ":: X Failed to install the default MySQL server. X"
-        color_orange ":: X To use Kamailio with MySQL, you must install an MySQL server later. X"
-        color_orange "..."
+        color_orange ":: ❌ Failed to install the default MySQL server."
+        color_orange ":: ❌ To use Kamailio with MySQL, you must install a MySQL server later."
+    else
+        color_green "✅ MySQL server installed successfully!"
     fi
 }
+
 
 ## Install PostgreSQL server
 install_postgreSQL() {
@@ -312,12 +339,29 @@ configure_config_files() {
 
     config_file="/usr/local/etc/kamailio"
 
+    # Activer MySQL et le domaine dans kamctlrc
     sed -i 's/^# DBENGINE=MYSQL/DBENGINE=MYSQL/' "$config_file/kamctlrc"
     sed -i "s/^# SIP_DOMAIN=kamailio.org/SIP_DOMAIN=$sip_domain/" "$config_file/kamctlrc"
-    sed -i 's/^# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/' "$config_file/kamctlrc"
+    sed -i 's|^# PID_FILE=/run/kamailio/kamailio.pid|PID_FILE=/run/kamailio/kamailio.pid|' "$config_file/kamctlrc" 
+
+    # Injecter les identifiants SQL si définis
+    if [[ -n "$sqlusername" && -n "$sqlpassword" ]]; then
+        sed -i "s/^# DBHOST=localhost/DBHOST=localhost/" "$config_file/kamctlrc"
+        sed -i "s/^# DBNAME=kamailio/DBNAME=kamailio/" "$config_file/kamctlrc"
+        sed -i "s/^# DBRWUSER=\"kamailio\"/DBRWUSER=\"$sqlusername\"/" "$config_file/kamctlrc"
+        sed -i "s/^# DBRWPW=\"kamailiorw\"/DBRWPW=\"$sqlpassword\"/" "$config_file/kamctlrc"
+        color_green ":: ✅ SQL credentials added to kamctlrc"
+    else
+        sed -i 's/^# DBRWUSER="kamailio"/DBRWUSER="kamailio"/' "$config_file/kamctlrc"
+        sed -i 's/^# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/' "$config_file/kamctlrc"
+        color_orange ":: ⚠️ SQL username or password not set. Skipping SQL credentials in kamctlrc."
+    fi
+
+    # Ajouter les directives à kamailio.cfg si pas déjà présentes
     sed -i 's|^# PID_FILE=/run/kamailio/kamailio.pid|PID_FILE=/run/kamailio/kamailio.pid|' "$config_file/kamctlrc" 
     sed -i '/#!KAMAILIO/a \#!define WITH_MYSQL\n#!define WITH_AUTH\n#!define WITH_USRLOCDB' "$config_file/kamailio.cfg"
 }
+
 
 ## Configure kamailio database & create test user
 create_database_and_user() {
@@ -508,7 +552,8 @@ check_kamailio_installed
 update_apt_repositories
 install_dependencies
 prepare_kamailio_storage_and_install
-install_mysql_server
+#install_mysql_server
+ask_for_mysql_server_installation
 configure_systemd_services
 configure_config_files
 create_database_and_user
